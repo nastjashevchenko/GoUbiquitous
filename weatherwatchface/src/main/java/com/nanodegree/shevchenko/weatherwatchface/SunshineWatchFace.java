@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -46,6 +48,9 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
     private static final Typeface NORMAL_TYPEFACE =
             Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
 
+    private static final Typeface BOLD_TYPEFACE =
+            Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
+
     /**
      * Update rate in milliseconds for interactive mode. We update once a second since seconds are
      * displayed in interactive mode.
@@ -56,6 +61,14 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
      * Handler message id for updating the time periodically in interactive mode.
      */
     private static final int MSG_UPDATE_TIME = 0;
+
+    private String mHours;
+    private String mMinutes;
+    // TODO replace hardcoded values with real
+    private String mDateToday = "FRI, JUL 14 2015";
+    private double mHighToday = 25;
+    private double mLowToday = 16;
+    private Bitmap mWeatherIcon;
 
     @Override
     public Engine onCreateEngine() {
@@ -76,8 +89,11 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
         boolean mRegisteredTimeZoneReceiver = false;
 
         Paint mBackgroundPaint;
-        Paint mTextPaint;
-
+        Paint mHourPaint;
+        Paint mMinutePaint;
+        Paint mDatePaint;
+        Paint mHighPaint;
+        Paint mLowPaint;
         boolean mAmbient;
 
         Time mTime;
@@ -104,10 +120,13 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             mYOffset = resources.getDimension(R.dimen.digital_y_offset);
 
             mBackgroundPaint = new Paint();
-            mBackgroundPaint.setColor(resources.getColor(R.color.digital_background));
+            mBackgroundPaint.setColor(resources.getColor(R.color.background));
 
-            mTextPaint = new Paint();
-            mTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
+            mHourPaint = createTextPaint(resources.getColor(R.color.text), BOLD_TYPEFACE);
+            mMinutePaint = createTextPaint(resources.getColor(R.color.text), NORMAL_TYPEFACE);
+            mDatePaint = createTextPaint(resources.getColor(R.color.text_light), NORMAL_TYPEFACE);
+            mHighPaint = createTextPaint(resources.getColor(R.color.text), NORMAL_TYPEFACE);
+            mLowPaint = createTextPaint(resources.getColor(R.color.text_light), NORMAL_TYPEFACE);
 
             mTime = new Time();
         }
@@ -118,10 +137,10 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             super.onDestroy();
         }
 
-        private Paint createTextPaint(int textColor) {
+        private Paint createTextPaint(int textColor, Typeface typeface) {
             Paint paint = new Paint();
             paint.setColor(textColor);
-            paint.setTypeface(NORMAL_TYPEFACE);
+            paint.setTypeface(typeface);
             paint.setAntiAlias(true);
             return paint;
         }
@@ -171,10 +190,18 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             boolean isRound = insets.isRound();
             mXOffset = resources.getDimension(isRound
                     ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
-            float textSize = resources.getDimension(isRound
+            float timeTextSize = resources.getDimension(isRound
                     ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
+            float dateTextSize = resources.getDimension(isRound
+                    ? R.dimen.date_text_size_round : R.dimen.date_text_size);
+            float tempTextSize = resources.getDimension(isRound
+                    ? R.dimen.temp_text_size_round : R.dimen.temp_text_size);
 
-            mTextPaint.setTextSize(textSize);
+            mHourPaint.setTextSize(timeTextSize);
+            mMinutePaint.setTextSize(timeTextSize);
+            mDatePaint.setTextSize(dateTextSize);
+            mHighPaint.setTextSize(tempTextSize);
+            mLowPaint.setTextSize(tempTextSize);
         }
 
         @Override
@@ -195,7 +222,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             if (mAmbient != inAmbientMode) {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
-                    mTextPaint.setAntiAlias(!inAmbientMode);
+                    mHourPaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -210,12 +237,54 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             // Draw the background.
             canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
 
+            int width = bounds.width();
+            float xCenter = width / 2f;
+            float yOffset = mYOffset;
+
             // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
             mTime.setToNow();
-            String text = mAmbient
+            mHours = String.format("%d", mTime.hour);
+            mMinutes = String.format(":%02d", mTime.minute);
+
+            /*String text = mAmbient
                     ? String.format("%d:%02d", mTime.hour, mTime.minute)
-                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);
-            canvas.drawText(text, mXOffset, mYOffset, mTextPaint);
+                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);*/
+
+            float hourWidth = mHourPaint.measureText(mHours);
+            float timeXOffset = xCenter - (hourWidth + mMinutePaint.measureText(mMinutes))/2;
+            canvas.drawText(mHours, timeXOffset, yOffset, mHourPaint);
+            canvas.drawText(mMinutes, timeXOffset + hourWidth, yOffset, mMinutePaint);
+
+            Rect dateTextBounds = new Rect();
+            mDatePaint.getTextBounds(mDateToday, 0, mDateToday.length(), dateTextBounds);
+            yOffset += dateTextBounds.height() + 5;
+            float dateXOffset = xCenter - mDatePaint.measureText(mDateToday)/2;
+            canvas.drawText(mDateToday, dateXOffset, yOffset, mDatePaint);
+
+            yOffset += 20;
+            canvas.drawLine(xCenter/2, yOffset, 3/2f * xCenter, yOffset, mDatePaint);
+            yOffset += 5;
+
+            String highText = Math.round(mHighToday) + "\u00B0";
+            String lowText = Math.round(mLowToday) + "\u00B0";
+
+            Rect tempTextBounds = new Rect();
+            mHighPaint.getTextBounds(highText, 0, highText.length(), tempTextBounds);
+
+            int indent = 8;
+            int iconEnlarger = 15;
+            int weatherIconSize = tempTextBounds.height() + 2 * iconEnlarger;
+            mWeatherIcon = BitmapFactory.decodeResource(getResources(), R.drawable.art_clear);
+            mWeatherIcon = Bitmap.createScaledBitmap(mWeatherIcon, weatherIconSize, weatherIconSize,
+                    false);
+
+            float highWidth = mHighPaint.measureText(highText);
+            float iconXOffset = xCenter - iconEnlarger - 3/2f * highWidth - indent;
+            canvas.drawBitmap(mWeatherIcon, iconXOffset, yOffset, null);
+
+            yOffset += tempTextBounds.height() + iconEnlarger;
+            canvas.drawText(highText, xCenter - highWidth/2, yOffset, mHighPaint);
+            canvas.drawText(lowText, xCenter + highWidth/2 + indent, yOffset, mLowPaint);
         }
 
         /**
