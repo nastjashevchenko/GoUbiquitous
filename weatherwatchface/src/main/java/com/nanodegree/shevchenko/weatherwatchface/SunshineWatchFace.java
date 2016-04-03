@@ -89,6 +89,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
         boolean mRegisteredTimeZoneReceiver = false;
 
         Paint mBackgroundPaint;
+        Paint mBackgroundPaintAmbient;
         Paint mHourPaint;
         Paint mMinutePaint;
         Paint mDatePaint;
@@ -121,6 +122,9 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(resources.getColor(R.color.background));
+
+            mBackgroundPaintAmbient = new Paint();
+            mBackgroundPaintAmbient.setColor(resources.getColor(R.color.background_ambient));
 
             mHourPaint = createTextPaint(resources.getColor(R.color.text), BOLD_TYPEFACE);
             mMinutePaint = createTextPaint(resources.getColor(R.color.text), NORMAL_TYPEFACE);
@@ -223,6 +227,10 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
                     mHourPaint.setAntiAlias(!inAmbientMode);
+                    mMinutePaint.setAntiAlias(!inAmbientMode);
+                    mDatePaint.setAntiAlias(!inAmbientMode);
+                    mHighPaint.setAntiAlias(!inAmbientMode);
+                    mLowPaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -235,7 +243,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             // Draw the background.
-            canvas.drawRect(0, 0, bounds.width(), bounds.height(), mBackgroundPaint);
+            Paint background = mAmbient ? mBackgroundPaintAmbient : mBackgroundPaint;
+            canvas.drawRect(0, 0, bounds.width(), bounds.height(), background);
 
             int width = bounds.width();
             float xCenter = width / 2f;
@@ -245,10 +254,6 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             mTime.setToNow();
             mHours = String.format("%d", mTime.hour);
             mMinutes = String.format(":%02d", mTime.minute);
-
-            /*String text = mAmbient
-                    ? String.format("%d:%02d", mTime.hour, mTime.minute)
-                    : String.format("%d:%02d:%02d", mTime.hour, mTime.minute, mTime.second);*/
 
             float hourWidth = mHourPaint.measureText(mHours);
             float timeXOffset = xCenter - (hourWidth + mMinutePaint.measureText(mMinutes))/2;
@@ -274,6 +279,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             int indent = 8;
             int iconEnlarger = 15;
             int weatherIconSize = tempTextBounds.height() + 2 * iconEnlarger;
+
+            // TODO Change icon for ambient mode
             mWeatherIcon = BitmapFactory.decodeResource(getResources(), R.drawable.art_clear);
             mWeatherIcon = Bitmap.createScaledBitmap(mWeatherIcon, weatherIconSize, weatherIconSize,
                     false);
