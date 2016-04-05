@@ -93,12 +93,12 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter
 
     @Override
     public void onConnected(Bundle bundle) {
-        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/today_forecast");
+        PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/today-forecast");
 
         putDataMapRequest.getDataMap().putString("date", mDate);
-        putDataMapRequest.getDataMap().putDouble("hi_temp", mHigh);
-        putDataMapRequest.getDataMap().putDouble("low_temp", mLow);
-        putDataMapRequest.getDataMap().putInt("weather_id", mWeatherId);
+        putDataMapRequest.getDataMap().putDouble("hi-temp", mHigh);
+        putDataMapRequest.getDataMap().putDouble("low-temp", mLow);
+        putDataMapRequest.getDataMap().putInt("weather-id", mWeatherId);
 
         PutDataRequest request = putDataMapRequest.asPutDataRequest();
         request.setUrgent();

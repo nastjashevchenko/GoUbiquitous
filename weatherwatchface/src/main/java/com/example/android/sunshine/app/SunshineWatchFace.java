@@ -63,13 +63,11 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
      */
     private static final int MSG_UPDATE_TIME = 0;
 
-    private String mHours;
-    private String mMinutes;
-    // TODO replace hardcoded values with real
-    private String mDateToday = "FRI, JUL 14 2015";
-    private String mHighToday = "25";
-    private String mLowToday = "16";
-    private int mWeatherId = 801;
+    private static final String DEGREE_STR = "\u00B0";
+    private String mDateToday;
+    private String mHighToday;
+    private String mLowToday;
+    private int mWeatherId;
 
     @Override
     public Engine onCreateEngine() {
@@ -88,7 +86,6 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
         };
 
         boolean mRegisteredTimeZoneReceiver = false;
-
         Paint mBackgroundPaint;
         Paint mBackgroundPaintAmbient;
         Paint mHourPaint;
@@ -113,12 +110,12 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             @Override
             public void onReceive(Context context, Intent intent) {
                 mDateToday = intent.getStringExtra("date");
-                double highToday = intent.getDoubleExtra("hi_temp", -99);
-                double lowToday = intent.getDoubleExtra("low_temp", -99);
-                mWeatherId = intent.getIntExtra("weather_id", 801);
+                double highToday = intent.getDoubleExtra("hi-temp", -99);
+                double lowToday = intent.getDoubleExtra("low-temp", -99);
+                mWeatherId = intent.getIntExtra("weather-id", 801);
 
-                mHighToday = Math.round(highToday) + "\u00B0";
-                mLowToday = Math.round(lowToday) + "\u00B0";
+                mHighToday = Math.round(highToday) + DEGREE_STR;
+                mLowToday = Math.round(lowToday) + DEGREE_STR;
             }
         };
 
@@ -298,13 +295,15 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
             // Draw H:MM in ambient mode or H:MM:SS in interactive mode.
             mTime.setToNow();
-            mHours = String.format("%d", mTime.hour);
-            mMinutes = String.format(":%02d", mTime.minute);
+            String mHours = String.format("%d", mTime.hour);
+            String mMinutes = String.format(":%02d", mTime.minute);
 
             float hourWidth = mHourPaint.measureText(mHours);
             float timeXOffset = xCenter - (hourWidth + mMinutePaint.measureText(mMinutes))/2;
             canvas.drawText(mHours, timeXOffset, yOffset, mHourPaint);
             canvas.drawText(mMinutes, timeXOffset + hourWidth, yOffset, mMinutePaint);
+
+            if (mDateToday == null) return;
 
             Rect dateTextBounds = new Rect();
             mDatePaint.getTextBounds(mDateToday, 0, mDateToday.length(), dateTextBounds);
@@ -316,35 +315,30 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             canvas.drawLine(xCenter/2, yOffset, 3/2f * xCenter, yOffset, mDatePaint);
             yOffset += 5;
 
-
-            /*
-            String highText = Math.round(mHighToday) + "\u00B0";
-            String lowText = Math.round(mLowToday) + "\u00B0";
-            */
-            // TODO
-            String highText = mHighToday;
-            String lowText = mLowToday;
+            if (mHighToday == null || mLowToday == null) return;
 
             Rect tempTextBounds = new Rect();
-            mHighPaint.getTextBounds(highText, 0, highText.length(), tempTextBounds);
+            mHighPaint.getTextBounds(mHighToday, 0, mHighToday.length(), tempTextBounds);
 
             int indent = 8;
             int iconEnlarger = 15;
             int weatherIconSize = tempTextBounds.height() + 2 * iconEnlarger;
 
-            // TODO Change icon for ambient mode
-            Bitmap mWeatherIcon = BitmapFactory.decodeResource(getResources(),
-                    getIconResourceForWeatherCondition(mWeatherId));
-            mWeatherIcon = Bitmap.createScaledBitmap(mWeatherIcon, weatherIconSize, weatherIconSize,
-                    false);
-
-            float highWidth = mHighPaint.measureText(highText);
+            float highWidth = mHighPaint.measureText(mHighToday);
             float iconXOffset = xCenter - iconEnlarger - 3/2f * highWidth - indent;
-            canvas.drawBitmap(mWeatherIcon, iconXOffset, yOffset, null);
+
+            // TODO Change icon for ambient mode
+            int icon = getIconResourceForWeatherCondition(mWeatherId);
+            if (icon != -1) {
+                Bitmap mWeatherIcon = BitmapFactory.decodeResource(getResources(), icon);
+                mWeatherIcon = Bitmap.createScaledBitmap(mWeatherIcon, weatherIconSize, weatherIconSize,
+                        false);
+                canvas.drawBitmap(mWeatherIcon, iconXOffset, yOffset, null);
+            }
 
             yOffset += tempTextBounds.height() + iconEnlarger;
-            canvas.drawText(highText, xCenter - highWidth/2, yOffset, mHighPaint);
-            canvas.drawText(lowText, xCenter + highWidth/2 + indent, yOffset, mLowPaint);
+            canvas.drawText(mHighToday, xCenter - highWidth/2, yOffset, mHighPaint);
+            canvas.drawText(mLowToday, xCenter + highWidth/2 + indent, yOffset, mLowPaint);
         }
 
         /**

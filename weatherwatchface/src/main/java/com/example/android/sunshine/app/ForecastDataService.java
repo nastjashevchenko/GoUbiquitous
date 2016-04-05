@@ -23,11 +23,11 @@ public class ForecastDataService extends WearableListenerService {
             if (dataEvent.getType() == DataEvent.TYPE_CHANGED) {
                 DataMap dataMap = DataMapItem.fromDataItem(dataEvent.getDataItem()).getDataMap();
                 String path = dataEvent.getDataItem().getUri().getPath();
-                if (path.equals("/today_forecast")) {
+                if (path.equals("/today-forecast")) {
                     date = dataMap.getString("date");
-                    high = dataMap.getDouble("hi_temp");
-                    low = dataMap.getDouble("low_temp");
-                    weatherId = dataMap.getInt("weather_id");
+                    high = dataMap.getDouble("hi-temp");
+                    low = dataMap.getDouble("low-temp");
+                    weatherId = dataMap.getInt("weather-id");
 
                     Log.d(LOG_TAG, ": date is " + date);
                     Log.d(LOG_TAG, ": high is " + high);
@@ -36,9 +36,9 @@ public class ForecastDataService extends WearableListenerService {
 
                     Intent intent = new Intent("WatchForecastData");
                     intent.putExtra("date", date);
-                    intent.putExtra("hi_temp", high);
-                    intent.putExtra("low_temp", low);
-                    intent.putExtra("weather_id", weatherId);
+                    intent.putExtra("hi-temp", high);
+                    intent.putExtra("low-temp", low);
+                    intent.putExtra("weather-id", weatherId);
 
                     LocalBroadcastManager.getInstance(getApplicationContext())
                             .sendBroadcast(intent);
