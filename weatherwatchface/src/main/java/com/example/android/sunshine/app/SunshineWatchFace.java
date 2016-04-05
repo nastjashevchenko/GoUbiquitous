@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.nanodegree.shevchenko.weatherwatchface;
+package com.example.android.sunshine.app;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -30,6 +30,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
@@ -66,8 +67,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
     private String mMinutes;
     // TODO replace hardcoded values with real
     private String mDateToday = "FRI, JUL 14 2015";
-    private double mHighToday = 25;
-    private double mLowToday = 16;
+    private String mHighToday = "25";
+    private String mLowToday = "16";
     private Bitmap mWeatherIcon;
 
     @Override
@@ -108,6 +109,19 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
          */
         boolean mLowBitAmbient;
 
+        private BroadcastReceiver mForecastDataReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mDateToday = intent.getStringExtra("date");
+                double highToday = intent.getDoubleExtra("hi_temp", -99);
+                double lowToday = intent.getDoubleExtra("low_temp", -99);
+                int weatherId = intent.getIntExtra("weather_id", 0);
+
+                mHighToday = Math.round(highToday) + "\u00B0";
+                mLowToday = Math.round(lowToday) + "\u00B0";
+            }
+        };
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
@@ -133,6 +147,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             mLowPaint = createTextPaint(resources.getColor(R.color.text_light), NORMAL_TYPEFACE);
 
             mTime = new Time();
+            LocalBroadcastManager.getInstance(getApplicationContext())
+                    .registerReceiver(mForecastDataReceiver, new IntentFilter("WatchForecastData"));
         }
 
         @Override
@@ -270,8 +286,14 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             canvas.drawLine(xCenter/2, yOffset, 3/2f * xCenter, yOffset, mDatePaint);
             yOffset += 5;
 
+
+            /*
             String highText = Math.round(mHighToday) + "\u00B0";
             String lowText = Math.round(mLowToday) + "\u00B0";
+            */
+            // TODO
+            String highText = mHighToday;
+            String lowText = mLowToday;
 
             Rect tempTextBounds = new Rect();
             mHighPaint.getTextBounds(highText, 0, highText.length(), tempTextBounds);
