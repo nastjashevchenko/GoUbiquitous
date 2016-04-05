@@ -14,7 +14,6 @@ public class ForecastDataService extends WearableListenerService {
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
-        Log.d("!!!!", "ON DATA CHANGED");
         String date;
         double high, low;
         int weatherId;

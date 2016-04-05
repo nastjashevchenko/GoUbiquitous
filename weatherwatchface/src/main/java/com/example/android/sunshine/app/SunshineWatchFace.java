@@ -69,7 +69,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
     private String mDateToday = "FRI, JUL 14 2015";
     private String mHighToday = "25";
     private String mLowToday = "16";
-    private Bitmap mWeatherIcon;
+    private int mWeatherId = 801;
 
     @Override
     public Engine onCreateEngine() {
@@ -115,12 +115,13 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
                 mDateToday = intent.getStringExtra("date");
                 double highToday = intent.getDoubleExtra("hi_temp", -99);
                 double lowToday = intent.getDoubleExtra("low_temp", -99);
-                int weatherId = intent.getIntExtra("weather_id", 0);
+                mWeatherId = intent.getIntExtra("weather_id", 801);
 
                 mHighToday = Math.round(highToday) + "\u00B0";
                 mLowToday = Math.round(lowToday) + "\u00B0";
             }
         };
+
 
         @Override
         public void onCreate(SurfaceHolder holder) {
@@ -256,6 +257,35 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             updateTimer();
         }
 
+        public int getIconResourceForWeatherCondition(int weatherId) {
+            // Based on weather code data found at:
+            // http://bugs.openweathermap.org/projects/api/wiki/Weather_Condition_Codes
+            if (weatherId >= 200 && weatherId <= 232) {
+                return R.drawable.ic_storm;
+            } else if (weatherId >= 300 && weatherId <= 321) {
+                return R.drawable.ic_light_rain;
+            } else if (weatherId >= 500 && weatherId <= 504) {
+                return R.drawable.ic_rain;
+            } else if (weatherId == 511) {
+                return R.drawable.ic_snow;
+            } else if (weatherId >= 520 && weatherId <= 531) {
+                return R.drawable.ic_rain;
+            } else if (weatherId >= 600 && weatherId <= 622) {
+                return R.drawable.ic_snow;
+            } else if (weatherId >= 701 && weatherId <= 761) {
+                return R.drawable.ic_fog;
+            } else if (weatherId == 761 || weatherId == 781) {
+                return R.drawable.ic_storm;
+            } else if (weatherId == 800) {
+                return R.drawable.ic_clear;
+            } else if (weatherId == 801) {
+                return R.drawable.ic_light_clouds;
+            } else if (weatherId >= 802 && weatherId <= 804) {
+                return R.drawable.ic_cloudy;
+            }
+            return -1;
+        }
+
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             // Draw the background.
@@ -278,7 +308,7 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
 
             Rect dateTextBounds = new Rect();
             mDatePaint.getTextBounds(mDateToday, 0, mDateToday.length(), dateTextBounds);
-            yOffset += dateTextBounds.height() + 5;
+            yOffset += dateTextBounds.height() + 15;
             float dateXOffset = xCenter - mDatePaint.measureText(mDateToday)/2;
             canvas.drawText(mDateToday, dateXOffset, yOffset, mDatePaint);
 
@@ -303,7 +333,8 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             int weatherIconSize = tempTextBounds.height() + 2 * iconEnlarger;
 
             // TODO Change icon for ambient mode
-            mWeatherIcon = BitmapFactory.decodeResource(getResources(), R.drawable.art_clear);
+            Bitmap mWeatherIcon = BitmapFactory.decodeResource(getResources(),
+                    getIconResourceForWeatherCondition(mWeatherId));
             mWeatherIcon = Bitmap.createScaledBitmap(mWeatherIcon, weatherIconSize, weatherIconSize,
                     false);
 
