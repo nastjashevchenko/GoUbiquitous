@@ -1,38 +1,22 @@
-Advanced Android Sample App
+Wearable Watch Face for Weather Forecast App
 ===================================
 
-Synchronizes weather information from OpenWeatherMap on Android Phones and Tablets. Used in the Udacity Advanced Android course.
-
-Pre-requisites
---------------
-Android SDK 21 or Higher
-Build Tools version 21.1.2
-Android Support AppCompat 22.2.0
-Android Support Annotations 22.2.0
-Android Support GridLayout 22.2.0
-Android Support CardView 22.2.0
-Android Support Design 22.2.0
-Android Support RecyclerView 22.2.0
-Google Play Services GCM 7.0.0
-BumpTech Glide 3.5.2
-
+Sunshine app is taken from [Udacity Course Github repo] (https://github.com/udacity/Advanced_Android_Development/)
+Wearable watch face uses weather information synchronized by phone app.
 
 Getting Started
 ---------------
-This sample uses the Gradle build system.  To build this project, use the
-"gradlew build" command or use "Import Project" in Android Studio.
+To use this application for phone and wearable device generate OpenWeatherAPI API key and add it to 
+gradle.properties: MyOpenWeatherMapApiKey="YOUR_API_KEY_HERE"
 
-Support
--------
+Watch Face Screens
+------------------
+![Square Watch](http://i.imgur.com/dRDiGTa.png "Square Watch")
+![Square Watch Ambient](http://i.imgur.com/2umqzZs.png "Square Watch Ambient")
+![Round Watch](http://i.imgur.com/lWUqcrJ.png "Round Watch")
 
-- Google+ Community: https://plus.google.com/communities/105153134372062985968
-- Stack Overflow: http://stackoverflow.com/questions/tagged/android
-
-Patches are encouraged, and may be submitted by forking this project and
-submitting a pull request through GitHub. Please see CONTRIBUTING.md for more details.
-
-License
--------
+Original App License
+--------------------
 Copyright 2015 The Android Open Source Project, Inc.
 
 Licensed to the Apache Software Foundation (ASF) under one or more contributor
