@@ -327,9 +327,10 @@ public class SunshineWatchFace extends CanvasWatchFaceService {
             float highWidth = mHighPaint.measureText(mHighToday);
             float iconXOffset = xCenter - iconEnlarger - 3/2f * highWidth - indent;
 
-            // TODO Change icon for ambient mode
             int icon = getIconResourceForWeatherCondition(mWeatherId);
-            if (icon != -1) {
+            // In ambient mode I hide weather icon, but it would be better to have
+            // another set of icons in black and white, ambient-friendly
+            if (icon != -1 && !mAmbient) {
                 Bitmap mWeatherIcon = BitmapFactory.decodeResource(getResources(), icon);
                 mWeatherIcon = Bitmap.createScaledBitmap(mWeatherIcon, weatherIconSize, weatherIconSize,
                         false);
