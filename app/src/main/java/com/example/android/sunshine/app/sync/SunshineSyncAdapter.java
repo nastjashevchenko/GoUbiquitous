@@ -380,8 +380,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter
 
                 // For today we update data to send to wear
                 if (i == 0) {
-                    // TODO parse date to string like "FRI, JUL 14 2015"
-                    mDate = Long.toString(dateTime);
+                    // Date is sent in format "FRI, JUL 14 2015"
+                    mDate = Utility.getFriendlyDateWithYear(dateTime).toUpperCase();
                     mHigh = high;
                     mLow = low;
                     mWeatherId = weatherId;

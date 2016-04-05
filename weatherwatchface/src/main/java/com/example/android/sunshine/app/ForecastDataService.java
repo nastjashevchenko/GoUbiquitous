@@ -11,6 +11,7 @@ import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.WearableListenerService;
 
 public class ForecastDataService extends WearableListenerService {
+    private static final String LOG_TAG = ForecastDataService.class.getSimpleName();
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
@@ -28,10 +29,10 @@ public class ForecastDataService extends WearableListenerService {
                     low = dataMap.getDouble("low_temp");
                     weatherId = dataMap.getInt("weather_id");
 
-                    Log.d("!!!!", ": date is " + date);
-                    Log.d("!!!!", ": high is " + high);
-                    Log.d("!!!!", ": low is " + low);
-                    Log.d("!!!!", ": icon asset is " + weatherId);
+                    Log.d(LOG_TAG, ": date is " + date);
+                    Log.d(LOG_TAG, ": high is " + high);
+                    Log.d(LOG_TAG, ": low is " + low);
+                    Log.d(LOG_TAG, ": icon asset is " + weatherId);
 
                     Intent intent = new Intent("WatchForecastData");
                     intent.putExtra("date", date);

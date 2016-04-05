@@ -104,6 +104,11 @@ public class Utility {
         }
     }
 
+    public static String getFriendlyDateWithYear(long dateInMillis) {
+        SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
+        return shortenedDateFormat.format(dateInMillis);
+    }
+
     /**
      * Helper method to convert the database representation of the date into something to display
      * to users.  As classy and polished a user experience as "20140102" is, we can do better.
